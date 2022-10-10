@@ -1,8 +1,7 @@
 {
   "ExpandedNodes": [
-    "\\Cluster\\redis-0",
-    "\\Cluster\\redis-1",
-    "\\Cluster\\redis-2"
+    ""
   ],
+  "SelectedNode": "\\C:\\Users\\admin\\Projects\\Dotnet Projects local Repo\\Redis.Net\\Redis-Cluster",
   "PreviewInSolutionExplorer": false
 }
