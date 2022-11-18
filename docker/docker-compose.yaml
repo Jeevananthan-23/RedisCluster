@@ -1,0 +1,140 @@
+version: "3.7"
+
+networks:
+  cluster-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.57.0/24
+      
+
+services:  
+  redis-standalone:
+    image: "redis/redis-stack-server"
+    container_name: redis-standalone
+    ports:
+      - "6379"
+    networks:
+      cluster-network:
+        ipv4_address: 192.168.57.17
+  redis-master:
+    image: "redis/redis-stack-server"
+    container_name: redis-master
+    ports:
+      - "6379"
+    networks:
+      cluster-network:
+        ipv4_address: 192.168.57.18
+  redis-replica:
+    image: "redis/redis-stack-server"
+    container_name: redis-replica
+    command: /opt/redis-stack/bin/redis-server --port 6379 --loadmodule /opt/redis-stack/lib/redisearch.so --loadmodule /opt/redis-stack/lib/redisgraph.so --loadmodule /opt/redis-stack/lib/redistimeseries.so --loadmodule /opt/redis-stack/lib/rejson.so --loadmodule /opt/redis-stack/lib/redisbloom.so --replicaof 192.168.57.18 6379
+    ports:
+      - "6379"
+  redis-sentinel:    
+    build:
+      context: ./sentinel
+    links:
+      - redis-master
+    depends_on:
+      - redis-master
+    ports:
+      - "26379"
+    networks:
+      cluster-network:
+        ipv4_address: 192.168.57.19
+  redis-sentinel2:    
+    build:
+      context: ./sentinel
+    links:
+      - redis-master
+    depends_on:
+      - redis-master
+    ports:
+      - "26379"
+    networks:
+      cluster-network:
+        ipv4_address: 192.168.57.20
+  redis-sentinel3:    
+    build:
+      context: ./sentinel
+    links:
+      - redis-master
+    depends_on:
+      - redis-master
+    ports:
+      - "26379" 
+    networks:
+      cluster-network:
+        ipv4_address: 192.168.57.21
+  redis-cluster1:
+    build:
+      context: ./cluster
+    ports:
+      - '6379'
+      - '16379'
+    networks: 
+      cluster-network:
+        ipv4_address: 192.168.57.10
+  redis-cluster2:
+    build:
+      context: ./cluster
+    ports:
+      - '6379'
+      - '16379'
+    networks:
+      cluster-network:
+        ipv4_address: 192.168.57.11
+  redis-cluster3:
+    build:
+      context: ./cluster
+    ports:
+      - '6379'
+      - '16379'
+    networks:
+      cluster-network:
+        ipv4_address: 192.168.57.12
+  redis-cluster4:
+    build:
+      context: ./cluster
+    ports:
+      - '6379'
+      - '16379'
+    networks:
+      cluster-network:
+        ipv4_address: 192.168.57.13
+  redis-cluster5:
+    build:
+      context: ./cluster
+    ports:
+      - '6379'
+      - '16379'
+    networks:
+      cluster-network:
+        ipv4_address: 192.168.57.14
+  redis-cluster6:
+    build:
+      context: ./cluster
+    entrypoint: ["/usr/local/bin/startup_cluster.sh"]
+    ports:
+      - '6379:6379'
+      - '16379'
+    networks:
+      cluster-network:
+        ipv4_address: 192.168.57.15
+    depends_on: 
+      - redis-cluster1
+      - redis-cluster2
+      - redis-cluster3
+      - redis-cluster4
+      - redis-cluster5
+  redis-private:
+    image: redis
+    ports:
+      - "6379"
+    networks:
+      cluster-network:
+        ipv4_address: 192.168.57.35
+    command: --port 6379 --requirepass foobar
+ 
